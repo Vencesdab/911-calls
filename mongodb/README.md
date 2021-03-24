@@ -65,6 +65,17 @@ db.calls.aggregate([
 
 ### Trouver le top 3 des villes avec le plus d'appels pour overdose
 ```
+db.calls.aggregate([
+	{ $match: { title : /overdose/i } },
+	  {
+	    $group: {
+	       _id : "$twp",
+	       count: { $sum: 1 }
+	    }
+	  },
+	  { $sort : { "count": -1 } },
+	  { $limit : 3 }
+])
 ```
 
 ### Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
