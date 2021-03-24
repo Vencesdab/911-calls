@@ -18,21 +18,47 @@ async function run() {
   await client.indices.create({
     index: INDEX_NAME,
     body : {
-      // TODO configurer l'index https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html
+      "mappings": {
+		"properties": {
+		  "location": { "type": "geo_point" },
+		  "timeStamp": { "type": "date" }
+		}
+	  }
     }
   });
-
+  calls = [];	
   fs.createReadStream('../911.csv')
     .pipe(csv())
     .on('data', data => {
       const call = { 
-      };
-      // TODO créer l'objet call à partir de la ligne
+		location : { "lat" : data.lat, "lon": data.lng},
+		desc : data.desc,
+		zip : data.zip,
+		title : data.title,
+		type : data.title.split(":")[0],
+		timeStamp : new Date(data.timeStamp),
+		twp : data.twp,
+		addr : data.addr
+	  };
+    calls.push(call);
     })
     .on('end', async () => {
-      // TODO insérer les données dans ES en utilisant l'API de bulk https://www.elastic.co/guide/en/elasticsearch/reference/7.x/docs-bulk.html
-    });
-  
+      client.bulk(createBulkInsertQuery(calls), (err, resp) => {
+      if (err) console.trace(err);
+      else console.log(`Inserted ${resp.body.items.length} calls`);
+      client.close();
+		});
+	});
+   function createBulkInsertQuery(calls) {
+	  const body = calls.reduce((acc, call) => {
+		const { location, desc, zip, title, type, timeStamp, twp, addr } = call;
+		acc.push({ index: { _index: '911-calls', _type: '_doc' } })
+		acc.push({ location, desc, zip, title, type, timeStamp, twp, addr })
+		return acc
+	  }, []);
+
+	  return { body };
+   }
 
 }
 
