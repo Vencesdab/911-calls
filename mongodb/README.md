@@ -31,12 +31,44 @@ Afin de répondre aux différents problèmes, vous allez avoir besoin de créer 
 
 À vous de jouer ! Écrivez les requêtes MongoDB permettant de résoudre les problèmes posés.
 
+### Compter le nombre d'appels par catégorie
 ```
-TODO : ajouter les requêtes MongoDB ici
-
 db.calls.aggregate([
-	{ "$group" : { _id: {$substr:["$title", 0, 4]}, count: {$sum:1} } }
+	{
+		"$group" : {
+			_id: {$substr:["$title", 0, 4]},
+			count: {$sum:1} }
+	}
 ])
+```
+
+### Trouver les 3 mois ayant comptabilisés le plus d'appels
+```
+db.calls.aggregate([
+	{
+		$group: {
+			_id: {
+				month: {$month: {$toDate: "$timeStamp"}},
+				year: {$year: {$toDate: "$timeStamp"}}
+				},
+			count: { $sum:1 }
+		}
+	},
+	{
+		$sort: {"count":-1}
+	},
+	{
+		$limit: 3
+	}
+])
+```
+
+### Trouver le top 3 des villes avec le plus d'appels pour overdose
+```
+```
+
+### Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
+```
 ```
 
 Vous allez sûrement avoir besoin de vous inspirer des points suivants de la documentation :
