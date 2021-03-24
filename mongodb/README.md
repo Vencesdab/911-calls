@@ -48,8 +48,8 @@ db.calls.aggregate([
 	{
 		$group: {
 			_id: {
-				month: {$month: {$toDate: "$timeStamp"}},
-				year: {$year: {$toDate: "$timeStamp"}}
+				month: {$month: "$timeStamp"},
+				year: {$year: "$timeStamp"}
 				},
 			count: { $sum:1 }
 		}
@@ -67,19 +67,31 @@ db.calls.aggregate([
 ```
 db.calls.aggregate([
 	{ $match: { title : /overdose/i } },
-	  {
-	    $group: {
-	       _id : "$twp",
-	       count: { $sum: 1 }
-	    }
-	  },
-	  { $sort : { "count": -1 } },
-	  { $limit : 3 }
+	{
+		$group: {
+			_id : "$twp",
+			count: { $sum: 1 }
+		}
+	},
+	{ $sort : { "count": -1 } },
+	{ $limit : 3 }
 ])
 ```
 
 ### Compter le nombre d'appels autour de Lansdale dans un rayon de 500 mètres
 ```
+db.calls.createIndex({point:"2dsphere"});
+
+db.calls.find(
+	{
+		point: {
+			$near : {
+				$geometry: { type: "Point",  coordinates: [ -75.283783, 40.241493 ] },
+				$maxDistance: 500
+			}
+		}
+	}
+).count()
 ```
 
 Vous allez sûrement avoir besoin de vous inspirer des points suivants de la documentation :
