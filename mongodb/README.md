@@ -33,6 +33,10 @@ Afin de répondre aux différents problèmes, vous allez avoir besoin de créer 
 
 ```
 TODO : ajouter les requêtes MongoDB ici
+
+db.calls.aggregate([
+	{ "$group" : { _id: {$substr:["$title", 0, 4]}, count: {$sum:1} } }
+])
 ```
 
 Vous allez sûrement avoir besoin de vous inspirer des points suivants de la documentation :
